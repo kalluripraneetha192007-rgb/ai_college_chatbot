@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #0f172a;
+  background: #f8fafc;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, #root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+}
+
+.night body {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.night .bg-slate-100 {
+  background-color: #0f172a !important;
+}
+
+.night .bg-white {
+  background-color: #172033 !important;
+}
+
+.night .bg-slate-50 {
+  background-color: #111827 !important;
+}
+
+.night .bg-primary-50,
+.night .bg-primary-100 {
+  background-color: #1e3a5f !important;
+}
+
+.night .bg-slate-100 {
+  color: #cbd5e1;
+}
+
+.night .bg-green-50 {
+  background-color: #123b2a !important;
+}
+
+.night .bg-red-50 {
+  background-color: #451a1a !important;
+}
+
+.night .bg-red-100 {
+  background-color: #642020 !important;
+}
+
+.night .text-slate-900,
+.night .text-slate-800 {
+  color: #f1f5f9 !important;
+}
+
+.night .text-slate-700,
+.night .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+.night .text-slate-500,
+.night .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+.night .border-slate-200,
+.night .border-slate-300 {
+  border-color: #334155 !important;
+}
+
+.night input,
+.night select,
+.night textarea {
+  color: #f1f5f9;
+  background-color: #172033;
+}
+
+.night input::placeholder,
+.night textarea::placeholder {
+  color: #94a3b8;
+}
+
+.night .theme-toggle {
+  border-color: #475569;
+  background-color: #172033;
+  color: #facc15;
+}
+
+.night .theme-toggle:hover {
+  background-color: #25324a;
+}
