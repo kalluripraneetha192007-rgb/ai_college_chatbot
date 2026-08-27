@@ -134,6 +134,11 @@ const sendMessage = async (req, res) => {
     const asksAboutClubs = normalizedQuestion.includes('club') || normalizedQuestion.includes('clubs');
     const asksAboutPlacement = normalizedQuestion.includes('placement');
     const asksAboutSrkr = /\bsrkr\b/i.test(normalizedQuestion);
+    const asksAboutDepartments = /department|branch|branches|course|courses|engineering/i.test(normalizedQuestion);
+    const isDepartmentMatch = (match) => {
+      const metadata = match.metadata || {};
+      return /department|branch|course/i.test(`${metadata.category || ''} ${metadata.title || ''} ${metadata.filename || ''}`);
+    };
     const isPlacementMatch = (match) => {
       const metadata = match.metadata || {};
       return /placement/i.test(`${metadata.category || ''} ${metadata.title || ''} ${metadata.filename || ''}`);
@@ -144,11 +149,15 @@ const sendMessage = async (req, res) => {
         ? sources.filter((source) => /placement/i.test(`${source.category || ''} ${source.title || ''} ${source.filename || ''}`))
         : asksAboutSrkr
           ? sources.filter((source) => /about college|college/i.test(`${source.title || ''} ${source.category || ''} ${source.filename || ''}`))
+        : asksAboutDepartments
+          ? sources.filter((source) => /department|branch|course/i.test(`${source.category || ''} ${source.title || ''} ${source.filename || ''}`))
         : sources;
     const relevantContext = asksAboutClubs
         ? searchResults.filter((match) => match.metadata?.category === 'Clubs').map((match) => match.metadata.text).filter(Boolean).slice(0, 8)
       : asksAboutPlacement
         ? searchResults.filter(isPlacementMatch).map((match) => match.metadata.text).filter(Boolean).slice(0, 8)
+        : asksAboutDepartments
+          ? searchResults.filter(isDepartmentMatch).map((match) => match.metadata.text).filter(Boolean).slice(0, 8)
         : contextChunks;
 
     const systemPrompt = [
@@ -156,7 +165,7 @@ const sendMessage = async (req, res) => {
       'Answer using only the retrieved college documents.',
       'If the retrieved documents do not contain enough information, say: "I couldn\'t find this information in the college knowledge base."',
       'Do not invent fees, dates, admission rules, exam schedules, placement statistics, policies, or contact information.',
-      'Give a complete answer using all relevant details in the context. For broad questions, organize the answer with a short summary followed by clear bullet points. Do not reduce a detailed document to one sentence.',
+      'Give a complete answer using all relevant details in the context. For broad questions, organize the answer with a short summary followed by clear bullet points. Do not reduce a detailed document to one sentence or stop after the first few items.',
       'Use the provided context below:',
       relevantContext.length ? relevantContext.join('\n\n') : 'No supporting context found.'
     ].join('\n');
@@ -170,14 +179,14 @@ const sendMessage = async (req, res) => {
           role: 'user',
           parts: [{ text: `${systemPrompt}\n\nQuestion: ${message}` }]
         }],
-        config: { maxOutputTokens: 700, temperature: 0.1 }
+        config: { maxOutputTokens: 1200, temperature: 0.1 }
       });
       answer = geminiResponse.text;
     } catch (error) {
       console.warn('Gemini response failed, using local answer:', error.message);
     }
 
-    answer = asksAboutSrkr
+    answer = asksAboutSrkr || asksAboutDepartments
       ? buildLocalAnswer(message, relevantContext)
       : answer || buildLocalAnswer(message, relevantContext);
 
@@ -236,6 +245,18 @@ const buildLocalAnswer = (question, contextChunks) => {
 
   if (/\bsrkr\b/i.test(normalizedQuestion)) {
     return 'SRKR stands for Sagi Ramakrishnam Raju Engineering College (Autonomous), Bhimavaram.';
+  }
+
+  if (/department|branch|branches|course|courses|engineering/i.test(normalizedQuestion)) {
+    const departmentText = contextChunks.join(' ').replace(/\s+/g, ' ').trim();
+    const departmentSentences = departmentText
+      .split(/(?<=[.!?])\s+|(?=\b(?:Civil|Computer|Electronics|Electrical|Mechanical|Information|Artificial|Chemical|Biotechnology)\s+(?:Engineering|Science))/i)
+      .map((sentence) => sentence.trim())
+      .filter((sentence) => sentence.length > 10);
+
+    if (departmentSentences.length) {
+      return `The college departments and branches mentioned in the uploaded documents are:\n\n${departmentSentences.map((sentence) => `- ${sentence}`).join('\n')}`;
+    }
   }
 
   if (normalizedQuestion.includes('fee') || normalizedQuestion.includes('fees')) {
