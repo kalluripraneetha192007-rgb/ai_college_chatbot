@@ -186,7 +186,7 @@ const sendMessage = async (req, res) => {
       console.warn('Gemini response failed, using local answer:', error.message);
     }
 
-    answer = asksAboutSrkr
+    answer = asksAboutSrkr || asksAboutDepartments
       ? buildLocalAnswer(message, relevantContext)
       : answer || buildLocalAnswer(message, relevantContext);
 
@@ -249,13 +249,14 @@ const buildLocalAnswer = (question, contextChunks) => {
 
   if (/department|branch|branches|course|courses|engineering/i.test(normalizedQuestion)) {
     const departmentText = contextChunks.join(' ').replace(/\s+/g, ' ').trim();
-    const departmentSentences = departmentText
-      .split(/(?<=[.!?])\s+|(?=\b(?:Civil|Computer|Electronics|Electrical|Mechanical|Information|Artificial|Chemical|Biotechnology)\s+(?:Engineering|Science))/i)
-      .map((sentence) => sentence.trim())
-      .filter((sentence) => sentence.length > 10);
+    const branchPattern = /(?:Civil Engineering|Computer Science and Engineering|Electronics and Communication Engineering|Electrical and Electronics Engineering|Mechanical Engineering|Information Technology|Artificial Intelligence and Data Science|Artificial Intelligence and Machine Learning|Computer Science and Business Systems|Computer Science and Design|CSE\s*[–-]\s*Internet of Things and Cyber Security including Blockchain Technology|Computer Science and Information Technology)[^.!?]{0,140}?(?=\s+Branch\s+\d+\b|\s+Academic Scope\b)/gi;
+    const departments = [...departmentText.matchAll(branchPattern)]
+      .map((match) => match[0].replace(/\s+$/, '').trim())
+      .filter((department) => department.length > 5)
+      .filter((department, index, list) => list.findIndex((item) => item.toLowerCase() === department.toLowerCase()) === index);
 
-    if (departmentSentences.length) {
-      return `The college departments and branches mentioned in the uploaded documents are:\n\n${departmentSentences.map((sentence) => `- ${sentence}`).join('\n')}`;
+    if (departments.length) {
+      return `The college departments and branches mentioned in the uploaded documents are:\n\n${departments.map((department) => `- ${department}`).join('\n')}`;
     }
   }
 
