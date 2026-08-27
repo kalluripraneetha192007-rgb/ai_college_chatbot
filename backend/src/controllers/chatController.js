@@ -165,7 +165,7 @@ const sendMessage = async (req, res) => {
       'Answer using only the retrieved college documents.',
       'If the retrieved documents do not contain enough information, say: "I couldn\'t find this information in the college knowledge base."',
       'Do not invent fees, dates, admission rules, exam schedules, placement statistics, policies, or contact information.',
-      'Give a complete answer using all relevant details in the context. For broad questions, organize the answer with a short summary followed by clear bullet points. Do not reduce a detailed document to one sentence or stop after the first few items.',
+      'Use simple English that a student can understand. Explain abbreviations the first time you use them. Give a complete answer using all relevant details in the context. For broad questions, organize the answer with a short summary followed by clear bullet points. Do not reduce a detailed document to one sentence or stop after the first few items. Avoid technical RAG or document-processing language.',
       'Use the provided context below:',
       relevantContext.length ? relevantContext.join('\n\n') : 'No supporting context found.'
     ].join('\n');
@@ -186,7 +186,7 @@ const sendMessage = async (req, res) => {
       console.warn('Gemini response failed, using local answer:', error.message);
     }
 
-    answer = asksAboutSrkr || asksAboutDepartments
+    answer = asksAboutSrkr
       ? buildLocalAnswer(message, relevantContext)
       : answer || buildLocalAnswer(message, relevantContext);
 
