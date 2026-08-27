@@ -34,7 +34,7 @@ const LoginPage = () => {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      setError(err.response?.data?.message || err.response?.data?.error || 'Unable to connect to the server. Please try again.');
     } finally {
       setLoading(false);
     }

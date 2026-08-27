@@ -27,7 +27,7 @@ const RegisterPage = () => {
       await register(form.name, form.email, form.password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.response?.data?.message || err.response?.data?.error || 'Unable to connect to the server. Please try again.');
     } finally {
       setLoading(false);
     }
