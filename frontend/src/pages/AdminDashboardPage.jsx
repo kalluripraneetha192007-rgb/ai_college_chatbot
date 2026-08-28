@@ -24,6 +24,7 @@ const AdminDashboardPage = () => {
   const { user, logout } = useAuth();
   const [documents, setDocuments] = useState([]);
   const [users, setUsers] = useState([]);
+  const [feedbackSummary, setFeedbackSummary] = useState({ helpful: 0, notHelpful: 0 });
   const [form, setForm] = useState({ title: '', category: 'Admissions' });
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -46,6 +47,7 @@ const AdminDashboardPage = () => {
     try {
       const response = await api.get('/admin/overview');
       setUsers(response.data?.users || []);
+      setFeedbackSummary(response.data?.feedbackSummary || { helpful: 0, notHelpful: 0 });
     } catch (error) {
       console.error('Failed to load admin overview', error);
     }
@@ -121,7 +123,7 @@ const AdminDashboardPage = () => {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid gap-4 md:grid-cols-4">
           <div className="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
             <div className="flex items-center justify-between">
               <span className="text-slate-500 text-sm">Total Documents</span>
@@ -144,6 +146,15 @@ const AdminDashboardPage = () => {
               <Database className="text-primary-600" size={18} />
             </div>
             <p className="mt-4 text-3xl font-bold text-slate-900">{documents.length ? 'Live' : '0'}</p>
+          </div>
+
+          <div className="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500 text-sm">Helpful Answers</span>
+              <span className="text-lg text-green-600">+</span>
+            </div>
+            <p className="mt-4 text-3xl font-bold text-slate-900">{feedbackSummary.helpful}</p>
+            <p className="mt-1 text-xs text-slate-500">{feedbackSummary.notHelpful} marked for review</p>
           </div>
         </div>
 

@@ -36,7 +36,7 @@ This project provides one place to ask college-related questions. It retrieves r
 - Department and category-wise document organization
 - Suggested questions
 - Relevance scores for retrieved sources
-- Admin dashboard with document and user overview
+- Admin dashboard with document, user, and feedback overview
 - Night mode
 - Responsive interface
 - Graceful fallback answers when the AI service is unavailable

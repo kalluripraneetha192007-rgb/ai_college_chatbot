@@ -14,10 +14,17 @@ const getAdminOverview = async (req, res) => {
       email: chat.userId?.email || '',
       role: message.role,
       content: message.content,
+      feedback: message.feedback || null,
       timestamp: message.timestamp
     }))).sort((first, second) => new Date(second.timestamp) - new Date(first.timestamp)).slice(0, 50);
 
-    res.status(200).json({ users, messages });
+    const feedbackSummary = messages.reduce((summary, message) => {
+      if (message.feedback === 'helpful') summary.helpful += 1;
+      if (message.feedback === 'not-helpful') summary.notHelpful += 1;
+      return summary;
+    }, { helpful: 0, notHelpful: 0 });
+
+    res.status(200).json({ users, messages, feedbackSummary });
   } catch (error) {
     res.status(500).json({ message: 'Failed to load admin overview.', error: error.message });
   }
