@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MessageSquareText, Plus, Send, Sparkles, Search, Trash2, LogOut } from 'lucide-react';
+import { MessageSquareText, Plus, Send, Sparkles, Search, ThumbsDown, ThumbsUp, Trash2, LogOut } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -115,6 +115,19 @@ const ChatPage = () => {
       setError(error.response?.data?.message || 'The assistant could not respond. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFeedback = async (messageIndex, feedback) => {
+    if (!currentChatId) return;
+
+    try {
+      await api.patch(`/chat/${currentChatId}/messages/${messageIndex}/feedback`, { feedback });
+      setMessages((currentMessages) => currentMessages.map((message, index) => (
+        index === messageIndex ? { ...message, feedback } : message
+      )));
+    } catch (error) {
+      setError(error.response?.data?.message || 'Could not save answer feedback.');
     }
   };
 
@@ -242,6 +255,28 @@ const ChatPage = () => {
                             <span className="font-medium text-slate-800">{source.title}</span>
                           </span>
                         ))}
+                      </div>
+                    )}
+
+                    {message.role === 'assistant' && (
+                      <div className="mt-3 flex items-center gap-1 border-t border-slate-100 pt-2">
+                        <span className="mr-2 text-xs text-slate-400">Was this helpful?</span>
+                        <button
+                          onClick={() => handleFeedback(index, message.feedback === 'helpful' ? null : 'helpful')}
+                          className={`rounded-lg p-1.5 ${message.feedback === 'helpful' ? 'bg-green-100 text-green-700' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'}`}
+                          title="Helpful"
+                          aria-label="Mark answer helpful"
+                        >
+                          <ThumbsUp size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleFeedback(index, message.feedback === 'not-helpful' ? null : 'not-helpful')}
+                          className={`rounded-lg p-1.5 ${message.feedback === 'not-helpful' ? 'bg-red-100 text-red-700' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'}`}
+                          title="Not helpful"
+                          aria-label="Mark answer not helpful"
+                        >
+                          <ThumbsDown size={14} />
+                        </button>
                       </div>
                     )}
                   </div>

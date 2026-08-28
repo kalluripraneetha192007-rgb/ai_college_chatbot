@@ -26,6 +26,7 @@ This project provides one place to ask college-related questions. It retrieves r
 - Source/reference display for answers
 - Unknown-question handling without invented information
 - Chat history and conversation management
+- Answer feedback with helpful/not-helpful controls
 - MongoDB database storage
 - Frontend-backend integration
 - Deployed frontend and backend

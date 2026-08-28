@@ -73,6 +73,34 @@ const deleteChat = async (req, res) => {
   }
 };
 
+const updateMessageFeedback = async (req, res) => {
+  try {
+    const { feedback } = req.body;
+    const messageIndex = Number(req.params.messageIndex);
+
+    if (!['helpful', 'not-helpful', null].includes(feedback) || !Number.isInteger(messageIndex) || messageIndex < 0) {
+      return res.status(400).json({ message: 'A valid feedback value and message index are required.' });
+    }
+
+    const chat = await Chat.findOne({ _id: req.params.chatId, userId: req.user._id });
+
+    if (!chat || !chat.messages[messageIndex]) {
+      return res.status(404).json({ message: 'Chat message not found.' });
+    }
+
+    if (chat.messages[messageIndex].role !== 'assistant') {
+      return res.status(400).json({ message: 'Feedback can only be added to assistant answers.' });
+    }
+
+    chat.messages[messageIndex].feedback = feedback;
+    await chat.save();
+
+    res.status(200).json({ feedback });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to save feedback.', error: error.message });
+  }
+};
+
 const sendMessage = async (req, res) => {
   try {
     const { message, chatId } = req.body;
@@ -288,5 +316,6 @@ module.exports = {
   getChatHistory,
   getChatById,
   deleteChat,
+  updateMessageFeedback,
   sendMessage
 };

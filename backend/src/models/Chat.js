@@ -23,6 +23,11 @@ const messageSchema = new mongoose.Schema(
       ],
       default: []
     },
+    feedback: {
+      type: String,
+      enum: ['helpful', 'not-helpful', null],
+      default: null
+    },
     timestamp: {
       type: Date,
       default: Date.now
