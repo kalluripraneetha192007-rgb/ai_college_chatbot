@@ -1,22 +1,132 @@
 # College RAG Chatbot
 
-A document-grounded college information assistant. Admins upload college PDFs, the backend extracts and indexes their text, and students ask questions through the chat interface.
+A document-grounded college information assistant for students and administrators. Students can ask questions in natural language, while administrators manage the official PDF documents used as the knowledge base.
 
-## Applications
+## Problem Statement
 
-- `frontend/` - React, Vite, Tailwind CSS, and React Router
-- `backend/` - Node.js, Express, MongoDB, PDF parsing, Pinecone, and Gemini
+College information is often spread across admission notices, course documents, fee details, academic calendars, placement information, and policy PDFs. Students may struggle to find the correct answer quickly or may receive incomplete information from generic chatbots.
 
-## Requirements
+This project provides one place to ask college-related questions. It retrieves relevant content from uploaded college documents and generates answers grounded in that content, with source references shown to the user.
+
+## Features
+
+### Core Features
+
+- Chat interface for college-related questions
+- Student and administrator authentication
+- Role-based access control
+- Admin PDF document upload and deletion
+- PDF text extraction and chunking
+- Embedding generation for document chunks
+- Pinecone vector database storage
+- Semantic similarity search
+- Hybrid keyword and semantic re-ranking
+- Retrieval-Augmented Generation (RAG) pipeline
+- Gemini-generated answers based on retrieved documents
+- Source/reference display for answers
+- Unknown-question handling without invented information
+- Chat history and conversation management
+- MongoDB database storage
+- Frontend-backend integration
+- Deployed frontend and backend
+
+### Bonus Features
+
+- Department and category-wise document organization
+- Suggested questions
+- Relevance scores for retrieved sources
+- Admin dashboard with document and user overview
+- Night mode
+- Responsive interface
+- Graceful fallback answers when the AI service is unavailable
+
+## RAG Pipeline
+
+```text
+College PDFs
+  -> Text extraction
+  -> Text chunking
+  -> Embeddings
+  -> Pinecone vector database
+  -> Similarity search and re-ranking
+  -> Relevant context
+  -> Gemini AI
+  -> Source-backed final answer
+```
+
+## Technology Stack
+
+### Frontend
+
+- React 18
+- Vite
+- React Router
+- Tailwind CSS
+- Axios
+- Lucide React icons
+
+### Backend
+
+- Node.js
+- Express
+- Mongoose
+- JSON Web Tokens (JWT)
+- bcryptjs
+- Multer
+- pdf-parse
+- dotenv
+
+### Databases and AI Services
+
+- MongoDB Atlas for users, chats, and document metadata
+- Pinecone for vector storage and semantic search
+- Google Gemini API for answer generation
+- Local 1024-dimension embedding generation
+
+## Screenshots
+
+Add screenshots of these application screens to a `screenshots/` folder before final submission:
+
+- `screenshots/landing-page.png` - Landing page
+- `screenshots/login-page.png` - Student login
+- `screenshots/chat-page.png` - Chat interface with an answer and source
+- `screenshots/admin-dashboard.png` - Admin document management
+- `screenshots/document-upload.png` - PDF upload form
+
+Example Markdown after adding the images:
+
+```markdown
+![Landing page](screenshots/landing-page.png)
+![Chat interface](screenshots/chat-page.png)
+![Admin dashboard](screenshots/admin-dashboard.png)
+```
+
+Do not include screenshots containing passwords, API keys, tokens, or private personal information.
+
+## Live Demo
+
+Frontend: https://ai-college-chatbot-cmvb.vercel.app
+
+Student login: https://ai-college-chatbot-cmvb.vercel.app/login
+
+Admin login: https://ai-college-chatbot-cmvb.vercel.app/login?admin=true
+
+## Backend
+
+API: https://ai-college-chatbot-5w6b.onrender.com
+
+Health check: https://ai-college-chatbot-5w6b.onrender.com/api/health
+
+## Local Setup
+
+### Requirements
 
 - Node.js 18 or newer
-- MongoDB Community Server running locally
-- A Pinecone account, API key, and existing index
-- A Gemini API key for chat answer generation
+- MongoDB Atlas account or local MongoDB
+- Pinecone account and an index configured for 1024 dimensions
+- Google Gemini API key
 
-The current Pinecone index must be configured with `1024` dimensions. Embeddings are generated locally, so PDF uploads do not use the Gemini embedding quota.
-
-## Installation
+### Installation
 
 From the repository root:
 
@@ -24,38 +134,35 @@ From the repository root:
 npm run install:all
 ```
 
-If MongoDB is not installed on Windows, install the official server with:
+### Environment Variables
 
-```powershell
-winget install --id MongoDB.Server
-```
+Create `backend/.env` using `backend/.env.example` as a template. Create `frontend/.env` using `frontend/.env.example` for local development.
 
-Confirm that the MongoDB service is running:
-
-```powershell
-Get-Service MongoDB
-```
-
-## Environment Configuration
-
-Create `backend/.env`. Do not commit this file or put real credentials in source code.
+Required backend variable names:
 
 ```env
-PORT=5005
-MONGODB_URI=mongodb://127.0.0.1:27017/college_rag
-JWT_SECRET=replace_with_a_long_random_secret
-GEMINI_API_KEY=replace_with_your_gemini_key
-GEMINI_MODEL=gemini-3.6-flash
-PINECONE_API_KEY=replace_with_your_pinecone_key
-PINECONE_INDEX=college-rag-index
-FRONTEND_URL=http://localhost:5173
+PORT
+MONGODB_URI
+JWT_SECRET
+GEMINI_API_KEY
+GEMINI_MODEL
+PINECONE_API_KEY
+PINECONE_INDEX
+EMBEDDING_MODEL
+FRONTEND_URL
 ```
 
-`backend/src/server.js` loads `backend/.env`. The backend reads the database URI from `process.env.MONGODB_URI`.
+Required frontend variable name:
 
-## Run the App
+```env
+VITE_API_URL
+```
 
-Run both frontend and backend from the repository root:
+Never commit `.env` files or real credentials to GitHub.
+
+### Run Locally
+
+Run both applications from the repository root:
 
 ```powershell
 npm run dev
@@ -68,101 +175,97 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
-Open the application at:
+Open the local frontend at:
 
-- Frontend: http://localhost:5173
-- Backend health check: http://localhost:5005/api/health
-
-The health check should return:
-
-```json
-{"status":"ok","message":"College RAG API is running"}
+```text
+http://localhost:5173
 ```
 
-The backend startup log should include `MongoDB connected: 127.0.0.1`.
+The local backend health check is:
+
+```text
+http://localhost:5005/api/health
+```
 
 ## Accounts and Roles
 
-Registering through the application creates a `student` account. The login page has a Role selector for Student and Admin, but selecting Admin does not grant permissions by itself. The account must already have `role: "admin"` in MongoDB.
+Registration creates a student account. To create an administrator:
 
-To promote an account using MongoDB Compass:
+1. Register an account through the application.
+2. Open the MongoDB Atlas `college_rag` database.
+3. Open the `users` collection.
+4. Change that user's `role` from `student` to `admin`.
+5. Open the admin login URL and select the Admin role.
 
-1. Connect to `mongodb://127.0.0.1:27017`.
-2. Open the `college_rag` database and `users` collection.
-3. Edit the intended user.
-4. Set `role` to `admin` and save.
-5. Log out and log in again with the Admin role selected.
+Selecting Admin in the login form does not grant administrator permissions by itself.
 
-Admin login is available at http://localhost:5173/login?admin=true.
+## Document Upload
 
-## Upload a PDF
+1. Sign in as an administrator.
+2. Open the admin dashboard.
+3. Enter a document title and category.
+4. Select a text-based PDF.
+5. Upload the document.
 
-1. Log in with an account whose role is `admin`.
-2. Open http://localhost:5173/admin.
-3. Enter a document title.
-4. Choose the matching category.
-5. Select a PDF file and click `Upload Document`.
+The backend extracts the text, creates chunks and embeddings, stores vectors in Pinecone, and saves document metadata in MongoDB. PDF files must be no larger than 10 MB. Scanned image-only PDFs may require OCR and may not produce useful text with the current parser.
 
-Upload requirements:
+## Deployment
 
-- `.pdf` files only
-- Maximum size: 10 MB
-- Text-based PDFs are recommended
-- Scanned image-only PDFs may not produce useful extracted text
+### Render Backend
 
-Useful categories include Admissions, Courses, Fees, Exams, Academic Calendar, Hostel, Scholarships, Placements, and Policies.
+```text
+Root Directory: backend
+Build Command: npm install
+Start Command: npm start
+```
 
-During upload, the backend extracts PDF text, splits it into chunks, creates local `1024`-dimension vectors, stores them in Pinecone, and saves the document metadata in MongoDB. A failed indexing operation is cleaned up instead of leaving an incomplete document record.
+Add all backend environment variables in the Render dashboard. Render supplies the `PORT` value automatically.
 
-## Ask Questions
+### Vercel Frontend
 
-After a successful upload:
+```text
+Root Directory: frontend
+Framework Preset: Vite
+Build Command: npm run build
+Output Directory: dist
+Install Command: npm install
+```
 
-1. Log in as a student or admin.
-2. Open http://localhost:5173/dashboard.
-3. Ask a question that matches the uploaded documents.
-
-Answers include source references when matching document chunks are found. If the knowledge base does not contain the answer, the assistant reports that it could not find the information instead of inventing a response.
+The Vercel frontend uses the `/api` path and forwards API requests to the Render backend through `frontend/vercel.json`.
 
 ## Troubleshooting
 
-### MongoDB does not connect
+### Login or registration fails
 
-Check that the MongoDB service is running and that `backend/.env` contains:
-
-```env
-MONGODB_URI=mongodb://127.0.0.1:27017/college_rag
-```
-
-Restart the backend after changing `.env`.
-
-### Admin access is rejected
-
-The selected login role must match the account role in MongoDB. Selecting Admin in the form only calls the admin login endpoint; it does not change the database role.
-
-### PDF upload fails
-
-Check the error displayed on the admin page. Common causes are:
-
-- The file is not a PDF or is larger than 10 MB.
-- The account is not an admin.
-- The Pinecone API key or index name is incorrect.
-- The Pinecone index is not ready or is not `1024` dimensions.
+- Confirm the Render backend health check returns status `200`.
+- Confirm the Vercel deployment uses the latest commit.
+- Confirm Render has `MONGODB_URI` configured.
+- Confirm Render `FRONTEND_URL` matches the deployed Vercel URL exactly.
+- Confirm the frontend is deployed with the Vercel API rewrite.
 
 ### Chat returns no document information
 
-Confirm that the upload completed successfully and that the document has a non-zero chunk count. Also confirm that the Pinecone index contains records and that `GEMINI_API_KEY` and `GEMINI_MODEL` are valid.
+- Confirm the document upload completed successfully.
+- Confirm the document has a non-zero chunk count.
+- Confirm the Pinecone index exists and uses 1024 dimensions.
+- Confirm the Gemini and Pinecone environment variables are valid.
 
-## Production Build
+### Admin access is rejected
 
-Build the frontend with:
+The account must have `role: "admin"` in the MongoDB `users` collection. The login role selector does not change the stored role.
+
+## Production Validation
+
+Build the frontend:
 
 ```powershell
 npm run build
 ```
 
-Start the backend in production mode with:
+Start the backend:
 
 ```powershell
 npm --prefix backend start
 ```
+
+The repository is configured to keep credentials out of GitHub through `.gitignore` and sanitized `.env.example` files.
