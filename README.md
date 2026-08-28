@@ -86,21 +86,15 @@ College PDFs
 
 ## Screenshots
 
-Add screenshots of these application screens to a `screenshots/` folder before final submission:
+The following screenshots show the main application screens:
 
-- `screenshots/landing-page.png` - Landing page
-- `screenshots/login-page.png` - Student login
-- `screenshots/chat-page.png` - Chat interface with an answer and source
-- `screenshots/admin-dashboard.png` - Admin document management
-- `screenshots/document-upload.png` - PDF upload form
-
-Example Markdown after adding the images:
-
-```markdown
 ![Landing page](screenshots/landing-page.png)
+
+![Student login](screenshots/login-page.png)
+
 ![Chat interface](screenshots/chat-page.png)
+
 ![Admin dashboard](screenshots/admin-dashboard.png)
-```
 
 Do not include screenshots containing passwords, API keys, tokens, or private personal information.
 
